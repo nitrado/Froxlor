@@ -1,0 +1,18 @@
+27.02.2012 11:58:20 [warning] [administrator-action (updater)] -------------- START LOG --------------
+27.02.2012 11:58:20 [warning] [administrator-action (updater)] Updating from 0.9.25 to 0.9.26-svn1
+27.02.2012 11:58:20 [warning] [administrator-action (updater)] Success
+27.02.2012 11:58:20 [warning] [administrator-action (updater)] Updating from 0.9.26-svn1 to 0.9.26-rc1
+27.02.2012 11:58:20 [warning] [administrator-action (updater)] Success
+27.02.2012 11:58:20 [warning] [administrator-action (updater)] Updating from 0.9.26-rc1 to 0.9.26
+27.02.2012 11:58:20 [warning] [administrator-action (updater)] Success
+27.02.2012 11:58:20 [warning] [administrator-action (updater)] --------------- END LOG ---------------
+31.05.2012 11:22:53 [warning] [administrator-action (updater)] -------------- START LOG --------------
+31.05.2012 11:22:53 [warning] [administrator-action (updater)] Updating from 0.9.26 to 0.9.27-svn1
+31.05.2012 11:22:53 [warning] [administrator-action (updater)] Success
+31.05.2012 11:22:53 [warning] [administrator-action (updater)] Updating from 0.9.27-svn1 to 0.9.27-svn2
+31.05.2012 11:22:53 [warning] [administrator-action (updater)] Success
+31.05.2012 11:22:53 [warning] [administrator-action (updater)] Updating from 0.9.27-svn2 to 0.9.27-rc1
+31.05.2012 11:22:53 [warning] [administrator-action (updater)] Success
+31.05.2012 11:22:53 [warning] [administrator-action (updater)] Updating from 0.9.27-rc1 to 0.9.27
+31.05.2012 11:22:53 [warning] [administrator-action (updater)] Success
+31.05.2012 11:22:53 [warning] [administrator-action (updater)] --------------- END LOG ---------------
