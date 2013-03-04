@@ -25,6 +25,12 @@ define('AREA', 'customer');
 
 require ("./lib/init.php");
 
+// TODO: Put this into a configuration file or something else.
+$zend_extensions = array(
+    'zend_extension_ioncube_loader' => '/usr/lib/php5/20090626/ioncube_loader_lin_5.3.so'
+);
+
+
 if(isset($_POST['id']))
 {
 	$id = intval($_POST['id']);
@@ -341,6 +347,36 @@ elseif($page == 'domains')
 								`ssl_redirect` = '" . $ssl_redirect . "', 
 								`phpsettingid` = '" . $phpsid_result['phpsettingid'] . "'");
 
+                    // Save php values into the specialsettings column.
+                    $php_options_data = include_once dirname(__FILE__).'/lib/formfields/customer/domains/formfield.php_options.php';
+                    $php_options_data = $php_options_data['domain_add']['sections']['section_b']['fields'];
+
+                    $php_settings = array();
+                    foreach ($_POST as $key => $php_value) {
+                        if (preg_match("/^(zend_extension|php)_(.*)$/", $key) == 0) continue;
+
+
+
+                        if (isset($php_options_data[$key])) {
+                            // ZEND extensions
+                            if (strstr($key, 'zend_extension') !== false && $php_value == "enabled") {
+                                $php_settings[$key] = $zend_extensions[$key];
+
+                            // Normal PHP value/flag
+                            } else {
+                                $php_setting = $php_options_data[$key]['label'];
+                                if (!in_array($php_value, $php_options_data[$key]['select_var'])) {
+                                    // Default setting
+                                    $php_settings[$php_setting] = $php_options_data[$key]['select_var'][0];
+                                } else {
+                                    // Setting is clean, we can save it.
+                                    $php_settings[$php_setting] = $php_value;
+                                }
+                            }
+                        }
+                    }
+                    savePHPSettings($db->insert_id(), $php_settings);
+
 					if($_doredirect)
 					{
 						$did = $db->insert_id();
@@ -393,6 +429,18 @@ elseif($page == 'domains')
 				$pathSelect = makePathfield($userinfo['documentroot'], $userinfo['guid'], $userinfo['guid'], $settings['panel']['pathedit']);
 
 				$subdomain_add_data = include_once dirname(__FILE__).'/lib/formfields/customer/domains/formfield.domains_add.php';
+
+                // Mix in the PHP options
+				$php_options_data = include_once dirname(__FILE__).'/lib/formfields/customer/domains/formfield.php_options.php';
+                $subdomain_add_data = array_merge_recursive($subdomain_add_data, $php_options_data);
+
+                // Replace the settings with real options
+                foreach ($subdomain_add_data['domain_add']['sections']['section_b']['fields'] as $key => $field) {
+                    $options = '';
+                    foreach ($field['select_var'] as $i => $val) $options .= makeoption($val, $val, NULL, true);
+                    $subdomain_add_data['domain_add']['sections']['section_b']['fields'][$key]['select_var'] = $options;
+                }
+
 				$subdomain_add_form = htmlform::genHTMLForm($subdomain_add_data);
 
 				$title = $subdomain_add_data['domain_add']['title'];
@@ -539,6 +587,35 @@ elseif($page == 'domains')
 						}
 					}
 
+
+                    // Save php values into the specialsettings column.
+                    $php_options_data = include_once dirname(__FILE__).'/lib/formfields/customer/domains/formfield.php_options.php';
+                    $php_options_data = $php_options_data['domain_add']['sections']['section_b']['fields'];
+
+                    $php_settings = array();
+                    foreach ($_POST as $key => $php_value) {
+                        if (preg_match("/^(zend_extension|php)_(.*)$/", $key) == 0) continue;
+
+                        if (isset($php_options_data[$key])) {
+                            // ZEND extensions
+                            if (strstr($key, 'zend_extension') !== false) {
+                                if ($php_value == "enabled") $php_settings[$key] = $zend_extensions[$key];
+
+                            // Normal PHP value/flag
+                            } else {
+                                $php_setting = $php_options_data[$key]['label'];
+                                if (!in_array($php_value, $php_options_data[$key]['select_var'])) {
+                                    // Default setting
+                                    $php_settings[$php_setting] = $php_options_data[$key]['select_var'][0];
+                                } else {
+                                    // Setting is clean, we can save it.
+                                    $php_settings[$php_setting] = $php_value;
+                                }
+                            }
+                        }
+                    }
+                    savePHPSettings((int)$id, $php_settings);
+
 					redirectTo($filename, Array('page' => $page, 's' => $s));
 				}
 			}
@@ -565,7 +642,7 @@ elseif($page == 'domains')
 					else
 					{
 						$urlvalue = '';
-						$pathSelect = makePathfield($userinfo['documentroot'], $userinfo['guid'], $userinfo['guid'], $settings['panel']['pathedit'], $result['documentroot'], true);						
+						$pathSelect = makePathfield($userinfo['documentroot'], $userinfo['guid'], $userinfo['guid'], $settings['panel']['pathedit'], $result['documentroot'], true);
 					}
 				}
 				else
@@ -599,6 +676,26 @@ elseif($page == 'domains')
 				$result = htmlentities_array($result);
 
 				$subdomain_edit_data = include_once dirname(__FILE__).'/lib/formfields/customer/domains/formfield.domains_edit.php';
+
+                // Mix in the PHP options
+				$php_options_data = include_once dirname(__FILE__).'/lib/formfields/customer/domains/formfield.php_options.php';
+                $subdomain_edit_data = array_merge_recursive($subdomain_edit_data, $php_options_data);
+
+                // Replace the settings with real options
+                $previous_php_settings = readPHPSettings((int)$id);
+
+                foreach ($subdomain_edit_data['domain_add']['sections']['section_b']['fields'] as $key => $field) {
+                    $options = '';
+
+                    foreach ($field['select_var'] as $i => $val) {
+                        $label = $field['label'];
+                        if (strstr($key, 'zend_extension') !== false) $label = $key;
+                        $selected_value = $previous_php_settings[$label] == $val ? $val : NULL;
+                        $options .= makeoption($val, $val, $selected_value, true);
+                    }
+                    $subdomain_edit_data['domain_add']['sections']['section_b']['fields'][$key]['select_var'] = $options;
+                }
+
 				$subdomain_edit_form = htmlform::genHTMLForm($subdomain_edit_data);
 
 				$title = $subdomain_edit_data['domain_edit']['title'];
