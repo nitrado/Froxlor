@@ -48,7 +48,15 @@ return array(
 						'label' => $lng['customer']['generated_pwd'],
 						'type' => 'text',
 						'value' => generatePassword(),
-					)
+					),
+                    'mysql_allow_external_access' => array(
+                        'label' => $lng['mysql']['allow_external_access'],
+                        'type' => 'checkbox',
+                        'values' => array(
+                            array('label' => $lng['panel']['yes'], 'value' => '1')
+                        ),
+                        'value' => array($access_result['allow_external_access'] == '1')
+                    )
 				)
 			)
 		)

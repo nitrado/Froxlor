@@ -1646,3 +1646,6 @@ $lng['serversettings']['phpfpm_settings']['idle_timeout']['description'] = 'Time
 $lng['panel']['cancel'] = 'abbrechen';
 $lng['admin']['delete_statistics'] = 'Statistiken L&ouml;schen';
 $lng['admin']['speciallogwarning'] = 'ACHTUNG: Durch diese Einstellungen werden Sie alle bisherige Statistiken dieser Domain verlieren. Wenn Sie dabei wirklich sicher sind, geben Sie bitte folgenden Text in das nachfolgende Textfeld ein: "'.$lng['admin']['delete_statistics'].'" und best&auml;tigen Sie mit "'.$lng['panel']['delete'].'".<br /><br />';
+
+// ADDED IN AARON-SPECIAL-VERSION
+$lng['mysql']['allow_external_access'] = 'Externen Zugriff erlauben';
