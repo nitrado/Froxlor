@@ -1818,6 +1818,10 @@ if(isFroxlorVersion('0.9.27-rc1'))
 	showUpdateStep("Updating from 0.9.27-rc1 to 0.9.27");
 	lastStepStatus(0);
 
+    // Add the external access column (see ticket #814);
+    $db->query('ALTER TABLE froxlor.panel_databases ADD allow_external_access INT(1) DEFAULT 0');
+
 	updateToVersion('0.9.27');
 }
+
 
