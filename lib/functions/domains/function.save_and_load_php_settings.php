@@ -1,15 +1,15 @@
 <?php
 
-// Delimiter for the special php settings in the apache config. All stuff below
-// this delimiter are php settings which will be automatically updated within
-// the functions in this file.
-define(PHP_SPECIALSETTINGS_DELIMITER, "##### PHP SETTINGS #####");
-
 // Save the given php settings (an array which key is the settings and the value
 // is the value of the php setting) to the specialsettings column for the given
 // domain. To separate the saved settings from the manually placed settings, a
 // delimiter is placed if the settings array os not empty.
 function savePHPSettings($panel_domain_id, $settings) {
+    // Delimiter for the special php settings in the apache config. All stuff below
+    // this delimiter are php settings which will be automatically updated within
+    // the functions in this file.
+    if (!defined(PHP_SPECIALSETTINGS_DELIMITER)) define(PHP_SPECIALSETTINGS_DELIMITER, "##### PHP SETTINGS #####");
+
     global $db;
     $result = $db->query_first("SELECT `specialsettings` FROM `" . TABLE_PANEL_DOMAINS . "`
         WHERE id = '" . $panel_domain_id . "'");
@@ -25,20 +25,16 @@ function savePHPSettings($panel_domain_id, $settings) {
     foreach ($settings as $key => $value) {
         $directive = "php_value";
         if (in_array(strtolower($value), array("on", "off"))) $directive = "php_flag";
-        if (strstr($key, "zend_extension") !== false) {
-            $directive = "zend_extension";
-            $key = "=";
-        }
+        if (strstr($key, "zend_extension") !== false) $key = "zend_extension";
         $php_settings .= "$directive $key $value\n";
     }
     if ($php_settings != "") {
         $apache_settings = $apache_settings . "\n" . PHP_SPECIALSETTINGS_DELIMITER . "\n" . $php_settings;
     }
 
-    $result = $db->query("UPDATE `" . TABLE_PANEL_DOMAINS . "` SET
+    $db->query("UPDATE `" . TABLE_PANEL_DOMAINS . "` SET
        `specialsettings` = '" . $db->escape($apache_settings) . "'
         WHERE id = '" . $panel_domain_id  . "'");
-
     return $apache_settings;
 }
 
@@ -46,6 +42,7 @@ function savePHPSettings($panel_domain_id, $settings) {
 // function uses the delimiter do determine the beginning of the settings.
 // The method returns an array with the settings read from the column.
 function readPHPSettings($panel_domain_id) {
+    if (!defined(PHP_SPECIALSETTINGS_DELIMITER)) define(PHP_SPECIALSETTINGS_DELIMITER, "##### PHP SETTINGS #####");
     global $db, $zend_extensions;
     $result = $db->query_first("SELECT `specialsettings` FROM `" . TABLE_PANEL_DOMAINS . "`
         WHERE id = '" . $panel_domain_id . "'");
@@ -55,19 +52,14 @@ function readPHPSettings($panel_domain_id) {
     $marker_reached = false;
     foreach (explode("\n", $result['specialsettings']) as $line) {
         if ($line == "") continue;
-        if ($marker_reached) {
-
-            // A normal php value/flag
-            if (preg_match('/php_(value|flag) +([^ ]+) +(.*)/', $line, $matches)) {
-                $php_settings[$matches[2]] = $matches[3];
-            }
-
-            // We have detected a zend extension
-            if (preg_match('/zend_extension = (.+)/', $line, $matches)) {
-                if ($zend_libs[$matches[1]]) {
-                    $extension_key = $zend_libs[$matches[1]];
-                    $php_settings[$extension_key] = "enabled"; //<-- Da ist der Wurm drin ...
+        if ($marker_reached && preg_match('/php_(value|flag) +([^ ]+) +(.*)/', $line, $matches)) {
+            if ($matches[2] == "zend_extension") {
+                if ($zend_libs[$matches[3]]) {
+                    $extension_key = $zend_libs[$matches[3]];
+                    $php_settings[$extension_key] = "enabled";
                 }
+            } else {
+                $php_settings[$matches[2]] = $matches[3];
             }
         }
         if ($line == PHP_SPECIALSETTINGS_DELIMITER) $marker_reached = true;
