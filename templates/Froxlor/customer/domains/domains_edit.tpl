@@ -17,6 +17,8 @@ $header
 						  {$subdomain_edit_form}
 					</table>
 
+          <p style="margin-left: 10px;"><a href="http://wiki.nitrado.net/index.php/PHP-Einstellungen">Hilfe zu den PHP-Einstellungen</a></p>
+
 					<p style="display: none;">
 						<input type="hidden" name="s" value="$s" />
 						<input type="hidden" name="page" value="$page" />

@@ -22,24 +22,28 @@ return array(
 					'php_memory_limit' => array(
 						'label' => 'memory_limit',
 						'type' => 'select',
-						'select_var' => array('64', '128', '256')
+                        'select_var' => array('64', '128', '256'),
+                        'default' => '128'
 					),
 					'php_allow_url_fopen' => array(
 						'label' => 'allow_url_fopen',
 						'type' => 'select',
-						'select_var' => array('on', 'off')
+                        'select_var' => array('on', 'off'),
+                        'default' => 'off'
 					),
 					'php_suhosin_session_encrypt' => array(
 						'label' => 'suhosin.session.encrypt',
 						'type' => 'select',
-						'select_var' => array('on', 'off')
+                        'select_var' => array('on', 'off'),
+                        'default' => 'on'
                     ),
 
                     // PHP Extensions (see customer_domains)
                     'zend_extension_ioncube_loader' => array(
                         'label' => 'IonCube Loader',
                         'type' => 'select',
-                        'select_var' => array('disabled', 'enabled')
+                        'select_var' => array('disabled', 'enabled'),
+                        'default' => 'disabled'
                     )
 				)
 			)

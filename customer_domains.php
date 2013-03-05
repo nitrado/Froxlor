@@ -355,8 +355,6 @@ elseif($page == 'domains')
                     foreach ($_POST as $key => $php_value) {
                         if (preg_match("/^(zend_extension|php)_(.*)$/", $key) == 0) continue;
 
-
-
                         if (isset($php_options_data[$key])) {
                             // ZEND extensions
                             if (strstr($key, 'zend_extension') !== false && $php_value == "enabled") {
@@ -367,7 +365,7 @@ elseif($page == 'domains')
                                 $php_setting = $php_options_data[$key]['label'];
                                 if (!in_array($php_value, $php_options_data[$key]['select_var'])) {
                                     // Default setting
-                                    $php_settings[$php_setting] = $php_options_data[$key]['select_var'][0];
+                                    $php_settings[$php_setting] = $php_options_data[$key]['default'];
                                 } else {
                                     // Setting is clean, we can save it.
                                     $php_settings[$php_setting] = $php_value;
@@ -437,7 +435,7 @@ elseif($page == 'domains')
                 // Replace the settings with real options
                 foreach ($subdomain_add_data['domain_add']['sections']['section_b']['fields'] as $key => $field) {
                     $options = '';
-                    foreach ($field['select_var'] as $i => $val) $options .= makeoption($val, $val, NULL, true);
+                    foreach ($field['select_var'] as $i => $val) $options .= makeoption($val, $val, $field['default'], true);
                     $subdomain_add_data['domain_add']['sections']['section_b']['fields'][$key]['select_var'] = $options;
                 }
 
@@ -606,7 +604,7 @@ elseif($page == 'domains')
                                 $php_setting = $php_options_data[$key]['label'];
                                 if (!in_array($php_value, $php_options_data[$key]['select_var'])) {
                                     // Default setting
-                                    $php_settings[$php_setting] = $php_options_data[$key]['select_var'][0];
+                                    $php_settings[$php_setting] = $php_options_data[$key]['default'];
                                 } else {
                                     // Setting is clean, we can save it.
                                     $php_settings[$php_setting] = $php_value;
@@ -690,7 +688,7 @@ elseif($page == 'domains')
                     foreach ($field['select_var'] as $i => $val) {
                         $label = $field['label'];
                         if (strstr($key, 'zend_extension') !== false) $label = $key;
-                        $selected_value = $previous_php_settings[$label] == $val ? $val : NULL;
+                        $selected_value = $previous_php_settings[$label] == $val ? $val : $field['default'];
                         $options .= makeoption($val, $val, $selected_value, true);
                     }
                     $subdomain_edit_data['domain_add']['sections']['section_b']['fields'][$key]['select_var'] = $options;

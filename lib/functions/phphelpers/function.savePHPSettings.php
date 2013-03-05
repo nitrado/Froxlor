@@ -7,6 +7,7 @@ function savePHPSettings($panel_domain_id, $settings) {
 
     $php_settings = "";
     foreach ($settings as $key => $value) {
+        if ($value == "disabled") continue;
         if (strstr($key, "zend_extension") !== false) $key = "zend_extension";
         $php_settings .= "$key $value\n";
     }
