@@ -334,7 +334,7 @@ elseif($page == 'mysqls')
 					{
 						$db_root->query('SET PASSWORD FOR `' . $db_root->escape($result['databasename']) . '`@`' . $db_root->escape($mysql_access_host) . '` = PASSWORD(\'' . $db_root->escape($password) . '\')');
 					}
-                    if ($access_result['allow_external_access'] == '1' && $_POST['mysql_allow_exteral_access'] == '1') {
+                    if ($access_result['allow_external_access'] == '1' && $_POST['mysql_allow_external_access'] == '1') {
                         $db_root->query('SET PASSWORD FOR `' . $db_root->escape($result['databasename']) . '`@`%` = PASSWORD(\'' . $db_root->escape($password) . '\')');
                     }
 
