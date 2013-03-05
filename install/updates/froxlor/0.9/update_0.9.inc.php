@@ -1820,6 +1820,7 @@ if(isFroxlorVersion('0.9.27-rc1'))
 
     // Add the external access column (see ticket #814);
     $db->query('ALTER TABLE froxlor.panel_databases ADD allow_external_access INT(1) DEFAULT 0');
+    $db->query('ALTER TABLE froxlor.panel_domains ADD special_phpsettings TEXT DEFAULT ""');
 
 	updateToVersion('0.9.27');
 }
