@@ -306,17 +306,16 @@ elseif($page == 'mysqls')
 
                 // External access checkbox
                 $db_root = new db($sql_root[$result['dbserver']]['host'], $sql_root[$result['dbserver']]['user'], $sql_root[$result['dbserver']]['password'], '');
-                if ($result['allow_external_access'] != $external_access_val) {
-                    if ($external_access_val == '1') {
-                        $db_root->query('GRANT ALL PRIVILEGES ON `'. $db_root->escape($result['databasename'])  .'`.* TO \''. $db_root->escape($result['databasename']) .'\'@\'%\'', false, true);
-                        $db_root->query('GRANT USAGE ON *.* TO \''. $db_root->escape($result['databasename']) .'\'@\'%\' IDENTIFIED BY \'password\'', false, true);
-                        $current_password = $db_root->query_first('SELECT password FROM mysql.user WHERE user = \'' . $db_root->escape($result['databasename']) . '\'', false, true);
-                        $db_root->query('SET PASSWORD FOR `' . $db_root->escape($result['databasename']) . '`@`%` = \''. $current_password['password'] .'\'', false, true);
-                    } else {
-                        $db_root->query('REVOKE ALL PRIVILEGES ON * . * FROM `' . $db_root->escape($result['databasename']) . '`@`%`', false, true);
-                        $db_root->query('REVOKE ALL PRIVILEGES ON `' . str_replace('_', '\_', $db_root->escape($result['databasename'])) . '` . * FROM `' . $db_root->escape($result['databasename']) . '`@`%`', false, true);
-                        $db_root->query('DELETE FROM `mysql`.`user` WHERE `User` = "' . $db_root->escape($result['databasename']) . '" AND `Host` = "%"', false, true);
-                    }
+
+                if ($external_access_val == '1') {
+                    $db_root->query('GRANT ALL PRIVILEGES ON `'. $db_root->escape($result['databasename'])  .'`.* TO \''. $db_root->escape($result['databasename']) .'\'@\'%\'', false, true);
+                    $db_root->query('GRANT USAGE ON *.* TO \''. $db_root->escape($result['databasename']) .'\'@\'%\' IDENTIFIED BY \'password\'', false, true);
+                    $current_password = $db_root->query_first('SELECT password FROM mysql.user WHERE user = \'' . $db_root->escape($result['databasename']) . '\' AND Host = \'localhost\'', false, true);
+                    $db_root->query('SET PASSWORD FOR `' . $db_root->escape($result['databasename']) . '`@`%` = \''. $current_password['password'] .'\'', false, true);
+                } else {
+                    $db_root->query('REVOKE ALL PRIVILEGES ON * . * FROM `' . $db_root->escape($result['databasename']) . '`@`%`', false, true);
+                    $db_root->query('REVOKE ALL PRIVILEGES ON `' . str_replace('_', '\_', $db_root->escape($result['databasename'])) . '` . * FROM `' . $db_root->escape($result['databasename']) . '`@`%`', false, true);
+                    $db_root->query('DELETE FROM `mysql`.`user` WHERE `User` = "' . $db_root->escape($result['databasename']) . '" AND `Host` = "%"', false, true);
                 }
 			    $db_root->query('FLUSH PRIVILEGES');
 				$db_root->close();
@@ -334,7 +333,8 @@ elseif($page == 'mysqls')
 					{
 						$db_root->query('SET PASSWORD FOR `' . $db_root->escape($result['databasename']) . '`@`' . $db_root->escape($mysql_access_host) . '` = PASSWORD(\'' . $db_root->escape($password) . '\')');
 					}
-                    if ($access_result['allow_external_access'] == '1' && $_POST['mysql_allow_external_access'] == '1') {
+                    //if ($access_result['allow_external_access'] == '1' && $_POST['mysql_allow_external_access'] == '1') {
+                    if ($external_access_val == '1') {
                         $db_root->query('SET PASSWORD FOR `' . $db_root->escape($result['databasename']) . '`@`%` = PASSWORD(\'' . $db_root->escape($password) . '\')');
                     }
 
