@@ -683,12 +683,14 @@ elseif($page == 'domains')
                 $previous_php_settings = readPHPSettings((int)$id);
 
                 foreach ($subdomain_edit_data['domain_add']['sections']['section_b']['fields'] as $key => $field) {
+                    $label = $field['label'];
+                    if (strstr($key, 'zend_extension') !== false) $label = $key;
+
                     $options = '';
+                    $selected_value = $field['default'];
+                    if (isset($previous_php_settings[$label])) $selected_value = $previous_php_settings[$label];
 
                     foreach ($field['select_var'] as $i => $val) {
-                        $label = $field['label'];
-                        if (strstr($key, 'zend_extension') !== false) $label = $key;
-                        $selected_value = $previous_php_settings[$label] == $val ? $val : $field['default'];
                         $options .= makeoption($val, $val, $selected_value, true);
                     }
                     $subdomain_edit_data['domain_add']['sections']['section_b']['fields'][$key]['select_var'] = $options;
