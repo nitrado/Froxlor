@@ -9,7 +9,7 @@ function savePHPSettings($panel_domain_id, $settings) {
     foreach ($settings as $key => $value) {
         if ($value == "disabled") continue;
         if (strstr($key, "zend_extension") !== false) $key = "zend_extension";
-        $php_settings .= "$key $value\n";
+        $php_settings .= "$key = $value\n";
     }
 
     $db->query("UPDATE `" . TABLE_PANEL_DOMAINS . "` SET
