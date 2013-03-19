@@ -42,7 +42,7 @@ class FroxlorLogin {
 
     private function setPackage($package) {
         $this->package = $package;
-        return $this->db->query("UPDATE panel_customers SET nitrado_service_type='".$this->db->escape($package)."' WHERE loginname='".$this->escape($this->loginname)."'");
+        return $this->db->query("UPDATE panel_customers SET nitrado_service_type='".$this->db->escape($package)."' WHERE loginname='".$this->db->escape($this->loginname)."'");
     }
     
     private function setLanguage($languageCode) {
