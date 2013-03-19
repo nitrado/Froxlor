@@ -10,6 +10,7 @@ class FroxlorLogin {
     private $loginname = '';
     private $userid = 0;
     private $language = 'de';
+    private $package = 'beginner';
     
     public function setCheckUrl($url) {
         $this->url = $url;
@@ -31,11 +32,17 @@ class FroxlorLogin {
         $this->setLoginname($data->alias);
         $this->setLanguage(empty($data->lang) ? 'de' : $data->lang);
         $this->userid = $this->getFroxlorUserid();
+        if (!empty($data->package)) $this->setPackage($data->package);
         $session = $this->getFroxlorSession();
         if (empty($session)) {
             $this->error('Could not create session');
         }
         header('LOCATION: customer_index.php?s=' . urlencode($session));
+    }
+
+    private function setPackage($package) {
+        $this->package = $package;
+        return $this->db->query("UPDATE panel_customers SET nitrado_service_type='".$this->db->escape($package)."' WHERE loginname='".$this->escape($this->loginname)."'");
     }
     
     private function setLanguage($languageCode) {
