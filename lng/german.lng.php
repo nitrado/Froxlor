@@ -215,6 +215,7 @@ $lng['error']['emailiswrong'] = 'Die E-Mail-Adresse %s enth&auml;lt ung&uuml;lti
 $lng['error']['loginnameiswrong'] = 'Der Login-Name %s enth&auml;lt ung&uuml;ltige Zeichen.';
 $lng['error']['userpathcombinationdupe'] = 'Kombination aus Benutzername und Pfad existiert bereits.';
 $lng['error']['patherror'] = 'Allgemeiner Fehler! Pfad darf nicht leer sein.';
+$lng['error']['extensionerror'] = 'Eine oder mehrere PHP-Extensions sind nicht mit dieser Version von PHP kompatibel. Bitte zuvor deaktivieren.';
 $lng['error']['errordocpathdupe'] = 'Option f&uuml;r Pfad %s existiert bereits.';
 $lng['error']['adduserfirst'] = 'Sie m&uuml;ssen zuerst einen Kunden anlegen.';
 $lng['error']['domainalreadyexists'] = 'Die Domain %s wurde bereits einem Kunden zugeordnet.';
@@ -329,6 +330,7 @@ $lng['admin']['templates']['COMPANY'] = 'Wird mit dem Firmennamen des Kunden ers
 $lng['admin']['templates']['USERNAME'] = 'Wird mit dem Benutzernamen des neuen Kundenkontos ersetzt.';
 $lng['admin']['templates']['PASSWORD'] = 'Wird mit dem Passwort des neuen Kundenkontos ersetzt.';
 $lng['admin']['templates']['EMAIL'] = 'Wird mit der Adresse des neuen POP3/IMAP Kontos ersetzt.';
+
 
 /**
  * Serversettings
@@ -1649,3 +1651,6 @@ $lng['admin']['speciallogwarning'] = 'ACHTUNG: Durch diese Einstellungen werden 
 
 // ADDED IN AARON-SPECIAL-VERSION
 $lng['mysql']['allow_external_access'] = 'Externen Zugriff erlauben';
+$lang['admin']['phpversion']['title'] = 'PHP Version';
+$lang['admin']['phpversion']['version'] = 'Zu verwendende PHP Version';
+

@@ -273,6 +273,9 @@ elseif($page == 'mysqls')
 				#$sendinfomail = makeyesno('sendinfomail', '1', '0', '0');
 
 				$mysql_add_data = include_once dirname(__FILE__).'/lib/formfields/customer/mysql/formfield.mysql_add.php';
+                if (!checkNitradoServiceLimit((int)$userinfo['customerid'], 'mysql', 'allow_external_access', '1')) {
+                    unset($mysql_add_data['mysql_add']['sections']['section_a']['fields']['mysql_allow_external_access']);
+                }
 				$mysql_add_form = htmlform::genHTMLForm($mysql_add_data);
 
 				$title = $mysql_add_data['mysql_add']['title'];
@@ -303,6 +306,9 @@ elseif($page == 'mysqls')
 				// Only change Password if it is set, do nothing if it is empty! -- PH 2004-11-29
                 $password = validate($_POST['mysql_password'], 'password');
                 $external_access_val = isset($_POST['mysql_allow_external_access']) ? '1' : '0';
+
+                if (!checkNitradoServiceLimit($userinfo['customerid'], 'mysql', 'allow_external_access'))
+                    $external_access_val = '0';
 
                 // External access checkbox
                 $db_root = new db($sql_root[$result['dbserver']]['host'], $sql_root[$result['dbserver']]['user'], $sql_root[$result['dbserver']]['password'], '');
@@ -355,6 +361,9 @@ elseif($page == 'mysqls')
 			{
                 $access_result = $db->query_first('SELECT `allow_external_access` FROM `' . TABLE_PANEL_DATABASES .'` WHERE `customerid`="' . (int)$userinfo['customerid'] . '" AND `id`="' . (int)$id . '"');
 				$mysql_edit_data = include_once dirname(__FILE__).'/lib/formfields/customer/mysql/formfield.mysql_edit.php';
+                if (!checkNitradoServiceLimit((int)$userinfo['customerid'], 'mysql', 'allow_external_access', '1')) {
+                    unset($mysql_edit_data['mysql_edit']['sections']['section_a']['fields']['mysql_allow_external_access']);
+                }
 				$mysql_edit_form = htmlform::genHTMLForm($mysql_edit_data);
 
 				$title = $mysql_edit_data['mysql_edit']['title'];

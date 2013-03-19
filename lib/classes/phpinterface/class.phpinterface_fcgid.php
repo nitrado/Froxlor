@@ -106,7 +106,7 @@ class phpinterface_fcgid
 		$starter_file.= "export PHP_FCGI_MAX_REQUESTS\n";
 
 		// Set Binary
-		$starter_file.= "exec " . $phpconfig['binary'] . " -c " . escapeshellarg($this->getConfigDir()) . "\n";
+        $starter_file.= "exec " . $this->_phpBinary($this->_domain['id']) . " -c " . escapeshellarg($this->getConfigDir()) . "\n";
 
 		//remove +i attibute, so starter can be overwritten
 		if(file_exists($this->getStarterFile()))
@@ -120,7 +120,7 @@ class phpinterface_fcgid
 		safe_exec('chmod 750 ' . escapeshellarg($this->getStarterFile()));
 		safe_exec('chown ' . $this->_domain['guid'] . ':' . $this->_domain['guid'] . ' ' . escapeshellarg($this->getStarterFile()));
 		setImmutable($this->getStarterFile());
-	}
+    }
 
 	public function createIniFile($phpconfig)
 	{
@@ -290,4 +290,13 @@ class phpinterface_fcgid
 
 		return $this->_admin_cache[$adminid];
 	}
+
+    private function _phpBinary($domainID) {
+        $res = $this->_db->query_first("SELECT php_version FROM `" . TABLE_PANEL_DOMAINS . "`
+            WHERE id = '$domainID'");
+        $phpVersion = $res ? $res['php_version'] : "5.3.22";
+        if (file_exists("/opt/php-builds/php-cgi-$phpVersion"))
+            return "/opt/php-builds/php-cgi-$phpVersion";
+        return "/usr/bin/php-cgi";
+    }
 }

@@ -215,6 +215,7 @@ $lng['error']['emailiswrong'] = 'E-mail-Address %s contains invalid characters o
 $lng['error']['loginnameiswrong'] = 'Login-Name %s contains invalid characters';
 $lng['error']['userpathcombinationdupe'] = 'Combination of username and path already exists';
 $lng['error']['patherror'] = 'General Error! Path cannot be empty';
+$lng['error']['extensionerror'] = 'One or more PHP extensions are not compatible with the choosen PHP version. Please daaktivate this option first.';
 $lng['error']['errordocpathdupe'] = 'Option for path %s already exists';
 $lng['error']['adduserfirst'] = 'Please create a customer first';
 $lng['error']['domainalreadyexists'] = 'The domain %s is already assigned to a customer';
@@ -1918,3 +1919,6 @@ $lng['admin']['speciallogwarning'] = 'WARNING: By changing this setting you will
 
 // ADDED IN AARON-SPECIAL-VERSION
 $lng['mysql']['allow_external_access'] = 'Allow external access';
+$lang['admin']['phpversion']['title'] = 'PHP Version';
+$lang['admin']['phpversion']['version'] = 'Selected PHP version';
+

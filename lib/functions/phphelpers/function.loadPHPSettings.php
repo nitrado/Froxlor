@@ -1,7 +1,7 @@
 <?php
 function readPHPSettings($panel_domain_id) {
     global $db, $zend_extensions;
-    $result = $db->query_first("SELECT `special_phpsettings` FROM `" . TABLE_PANEL_DOMAINS . "`
+    $result = $db->query_first("SELECT `special_phpsettings`, `php_version` FROM `" . TABLE_PANEL_DOMAINS . "`
         WHERE id = '" . $panel_domain_id . "'");
 
     $php_settings = array();
@@ -10,8 +10,9 @@ function readPHPSettings($panel_domain_id) {
         if ($line == "") continue;
         if (preg_match('/([^ ]+) (= )?(.*)/', $line, $matches)) {
             if ($matches[1] == "zend_extension") {
-                if ($zend_libs[$matches[3]]) {
-                    $extension_key = $zend_libs[$matches[3]];
+                $lib = str_replace(substr($result['php_version'], 0, 3), '%VERSION%', $matches[3]);
+                if ($zend_libs[$lib]) {
+                    $extension_key = $zend_libs[$lib];
                     $php_settings[$extension_key] = "enabled";
                 }
             } else {

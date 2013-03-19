@@ -7,23 +7,18 @@
 // be an array with all valid options. The first option is the default
 // option.
 
-
-
-//TODO: fsock_open
-
-
 return array(
 	'domain_add' => array(
 		'sections' => array(
-			'section_b' => array(
+			'section_c' => array(
                 'title' => $lng['admin']['phpsettings']['title'],
                 'image' => 'icons/phpsettings.png',
 				'fields' => array(
 					'php_memory_limit' => array(
 						'label' => 'memory_limit',
 						'type' => 'select',
-                        'select_var' => array('64', '128', '256'),
-                        'default' => '128'
+                        'select_var' => array('64M', '128M', '256M'),
+                        'default' => '128M'
 					),
 					'php_allow_url_fopen' => array(
 						'label' => 'allow_url_fopen',

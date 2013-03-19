@@ -27,8 +27,35 @@ require ("./lib/init.php");
 
 // TODO: Put this into a configuration file or something else.
 $zend_extensions = array(
-    'zend_extension_ioncube_loader' => '/usr/lib/php5/20090626/ioncube_loader_lin_5.3.so'
+    'zend_extension_ioncube_loader' => '/opt/php-builds/extensions/ioncube_loader_lin_%VERSION%.so'
 );
+
+// PHP versions
+$availablePHPVersions = array(
+    '5.3.22',
+    '5.4.12',
+    '5.5.0alpha6'
+);
+function currentPHPVersion($customerID, $domainID) {
+    global $db;
+    $res = $db->query_first("SELECT php_version FROM `" . TABLE_PANEL_DOMAINS . "`
+        WHERE `customerid`='" . (int)$customerID . "'
+        AND `id`='" . (int)$domainID . "'");
+    return $res ? $res['php_version'] : "5.3.22";
+}
+
+
+function phpVersionOptions($customerID, $domainID) {
+    global $db, $availablePHPVersions;
+
+    $selectedPHPVersion = currentPHPVersion($customerID, $domainID);
+    $phpVersionOptions = '';
+    foreach ($availablePHPVersions as $phpVersion) {
+        if (checkNitradoServiceLimit($customerID, 'php', 'php_version', $phpVersion))
+            $phpVersionOptions .= makeoption($phpVersion, $phpVersion, $selectedPHPVersion, true);
+    }
+    return $phpVersionOptions;
+}
 
 
 if(isset($_POST['id']))
@@ -331,6 +358,12 @@ elseif($page == 'domains')
 						$phpsid_result['phpsettingid'] = 1;
 					}
 
+                    // PHP Version
+                    $php_version = $_POST['php_version'];
+                    if (!in_array($_POST['php_version'], $availablePHPVersions) ||
+                        !checkNitradoServiceLimit((int)$userinfo['customerid'], 'php', 'php_version', $php_version))
+                        $php_version = "5.3.22";
+
 					$result = $db->query("INSERT INTO `" . TABLE_PANEL_DOMAINS . "` SET 
 								`customerid` = '" . (int)$userinfo['customerid'] . "',
 								`domain` = '" . $db->escape($completedomain) . "', 
@@ -345,11 +378,12 @@ elseif($page == 'domains')
 								`speciallogfile` = '" . $db->escape($domain_check['speciallogfile']) . "', 
 								`specialsettings` = '" . $db->escape($domain_check['specialsettings']) . "', 
 								`ssl_redirect` = '" . $ssl_redirect . "', 
-								`phpsettingid` = '" . $phpsid_result['phpsettingid'] . "'");
+                                `phpsettingid` = '" . $phpsid_result['phpsettingid'] . "',
+                                `php_version` = '" . $php_version . "'");
 
                     // Save php values into the specialsettings column.
                     $php_options_data = include_once dirname(__FILE__).'/lib/formfields/customer/domains/formfield.php_options.php';
-                    $php_options_data = $php_options_data['domain_add']['sections']['section_b']['fields'];
+                    $php_options_data = $php_options_data['domain_add']['sections']['section_c']['fields'];
 
                     $php_settings = array();
                     foreach ($_POST as $key => $php_value) {
@@ -358,7 +392,8 @@ elseif($page == 'domains')
                         if (isset($php_options_data[$key])) {
                             // ZEND extensions
                             if (strstr($key, 'zend_extension') !== false && $php_value == "enabled") {
-                                $php_settings[$key] = $zend_extensions[$key];
+                                $lib = str_replace('%VERSION%', substr($php_version, 0, 3), $zend_extensions[$key]);
+                                if (file_exists($lib)) $php_settings[$key] = $lib;
 
                             // Normal PHP value/flag
                             } else {
@@ -373,7 +408,7 @@ elseif($page == 'domains')
                             }
                         }
                     }
-                    savePHPSettings($db->insert_id(), $php_settings);
+                    savePHPSettings($db->insert_id(), (int)$userinfo['customerid'], $php_settings); //add
 
 					if($_doredirect)
 					{
@@ -398,6 +433,7 @@ elseif($page == 'domains')
 			{
 				$result = $db->query("SELECT `id`, `domain`, `documentroot`, `ssl_redirect`,`isemaildomain` FROM `" . TABLE_PANEL_DOMAINS . "` WHERE `customerid`='" . (int)$userinfo['customerid'] . "' AND `parentdomainid`='0' AND `email_only`='0' AND `caneditdomain`='1' ORDER BY `domain` ASC");
 				$domains = '';
+                $phpVersionOptions = phpVersionOptions((int)$userinfo['customerid'], (int)$result['id']);
 
 				while($row = $db->fetch_array($result))
 				{
@@ -433,10 +469,16 @@ elseif($page == 'domains')
                 $subdomain_add_data = array_merge_recursive($subdomain_add_data, $php_options_data);
 
                 // Replace the settings with real options
-                foreach ($subdomain_add_data['domain_add']['sections']['section_b']['fields'] as $key => $field) {
+                foreach ($subdomain_add_data['domain_add']['sections']['section_c']['fields'] as $key => $field) {
+                    // Allowed to see?
+                    $check_key = substr($key, 0, 4) == 'php_' ? substr($key, 4) : $key;
+
                     $options = '';
-                    foreach ($field['select_var'] as $i => $val) $options .= makeoption($val, $val, $field['default'], true);
-                    $subdomain_add_data['domain_add']['sections']['section_b']['fields'][$key]['select_var'] = $options;
+                    foreach ($field['select_var'] as $i => $val) {
+                        if (checkNitradoServiceLimit((int)$userinfo['customerid'], 'php', $check_key, $val))
+                            $options .= makeoption($val, $val, $field['default'], true);
+                    }
+                    $subdomain_add_data['domain_add']['sections']['section_c']['fields'][$key]['select_var'] = $options;
                 }
 
 				$subdomain_add_form = htmlform::genHTMLForm($subdomain_add_data);
@@ -547,6 +589,17 @@ elseif($page == 'domains')
 					$ssl_redirect = '0';
 				}
 
+                // Save the PHP version
+                $php_version = $_POST['php_version'];
+                if (!in_array($_POST['php_version'], $availablePHPVersions) ||
+                    !checkNitradoServiceLimit((int)$userinfo['customerid'], 'php', 'php_version', $php_version))
+                    $php_version = "5.3.22";
+
+                $db->query("UPDATE `" . TABLE_PANEL_DOMAINS . "`
+                    SET php_version = '" . $php_version . "'
+                    WHERE customerid = '" . (int)$result['customerid'] . "'
+                    AND id = '" . (int)$id . "'");
+
 				if($path == '')
 				{
 					standard_error('patherror');
@@ -585,19 +638,22 @@ elseif($page == 'domains')
 						}
 					}
 
-
                     // Save php values into the specialsettings column.
                     $php_options_data = include_once dirname(__FILE__).'/lib/formfields/customer/domains/formfield.php_options.php';
-                    $php_options_data = $php_options_data['domain_add']['sections']['section_b']['fields'];
+                    $php_options_data = $php_options_data['domain_add']['sections']['section_c']['fields'];
 
                     $php_settings = array();
                     foreach ($_POST as $key => $php_value) {
                         if (preg_match("/^(zend_extension|php)_(.*)$/", $key) == 0) continue;
-
                         if (isset($php_options_data[$key])) {
                             // ZEND extensions
-                            if (strstr($key, 'zend_extension') !== false) {
-                                if ($php_value == "enabled") $php_settings[$key] = $zend_extensions[$key];
+                            if (strstr($key, 'zend_extension') !== false && $php_value == "enabled") {
+                                $lib = str_replace('%VERSION%', substr($php_version, 0, 3), $zend_extensions[$key]);
+                                if (file_exists($lib)) {
+                                    $php_settings[$key] = $lib;
+                                } else {
+                                    standard_error('extensionerror');
+                                }
 
                             // Normal PHP value/flag
                             } else {
@@ -612,8 +668,7 @@ elseif($page == 'domains')
                             }
                         }
                     }
-                    savePHPSettings((int)$id, $php_settings);
-
+                    savePHPSettings((int)$id, (int)$userinfo['customerid'], $php_settings); //edit
 					redirectTo($filename, Array('page' => $page, 's' => $s));
 				}
 			}
@@ -623,6 +678,9 @@ elseif($page == 'domains')
 				$domains = makeoption($lng['domains']['noaliasdomain'], 0, $result['aliasdomain'], true);
 				// also check ip/port combination to be the same, #176
 				$result_domains = $db->query("SELECT `d`.`id`, `d`.`domain` FROM `" . TABLE_PANEL_DOMAINS . "` `d`, `" . TABLE_PANEL_CUSTOMERS . "` `c` WHERE `d`.`aliasdomain` IS NULL AND `d`.`id`<>'" . (int)$result['id'] . "' AND `c`.`standardsubdomain`<>`d`.`id` AND `d`.`customerid`='" . (int)$userinfo['customerid'] . "' AND `c`.`customerid`=`d`.`customerid` AND `d`.`ipandport` = '".(int)$result['ipandport']."' ORDER BY `d`.`domain` ASC");
+                
+                $php_version = currentPHPVersion((int)$userinfo['customerid'], (int)$result['id']);
+                $phpVersionOptions = phpVersionOptions((int)$userinfo['customerid'], (int)$result['id']);
 
 				while($row_domain = $db->fetch_array($result_domains))
 				{
@@ -680,9 +738,9 @@ elseif($page == 'domains')
                 $subdomain_edit_data = array_merge_recursive($subdomain_edit_data, $php_options_data);
 
                 // Replace the settings with real options
-                $previous_php_settings = readPHPSettings((int)$id);
+                $previous_php_settings = readPHPSettings((int)$id, $php_version);
 
-                foreach ($subdomain_edit_data['domain_add']['sections']['section_b']['fields'] as $key => $field) {
+                foreach ($subdomain_edit_data['domain_add']['sections']['section_c']['fields'] as $key => $field) {
                     $label = $field['label'];
                     if (strstr($key, 'zend_extension') !== false) $label = $key;
 
@@ -690,10 +748,15 @@ elseif($page == 'domains')
                     $selected_value = $field['default'];
                     if (isset($previous_php_settings[$label])) $selected_value = $previous_php_settings[$label];
 
+                    // Allowed to see?
+                    $check_key = substr($key, 0, 4) == 'php_' ? substr($key, 4) : $key;
+                    if (!checkNitradoServiceLimit((int)$userinfo['customerid'], 'php', $check_key, $selected_value)) continue;
+
                     foreach ($field['select_var'] as $i => $val) {
-                        $options .= makeoption($val, $val, $selected_value, true);
+                        if (checkNitradoServiceLimit((int)$userinfo['customerid'], 'php', $check_key, $val))
+                            $options .= makeoption($val, $val, $selected_value, true);
                     }
-                    $subdomain_edit_data['domain_add']['sections']['section_b']['fields'][$key]['select_var'] = $options;
+                    $subdomain_edit_data['domain_add']['sections']['section_c']['fields'][$key]['select_var'] = $options;
                 }
 
 				$subdomain_edit_form = htmlform::genHTMLForm($subdomain_edit_data);

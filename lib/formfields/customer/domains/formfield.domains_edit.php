@@ -93,7 +93,18 @@ return array(
 						'select_var' => $openbasedir
 					)
 				)
-			)
+            ),
+            'section_b' => array(
+                'title' => $lang['admin']['phpversion']['title'],
+                'image' => 'icons/phpsettings.png',
+                'fields' => array(
+                    'php_version' => array(
+                        'label' => $lang['admin']['phpversion']['version'],
+                        'type' => 'select',
+                        'select_var' => $phpVersionOptions
+                    )
+                )
+            )
 		)
 	)
 );

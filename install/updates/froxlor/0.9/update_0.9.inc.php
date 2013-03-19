@@ -1822,6 +1822,10 @@ if(isFroxlorVersion('0.9.27-rc1'))
     $db->query('ALTER TABLE froxlor.panel_databases ADD allow_external_access INT(1) DEFAULT 0');
     $db->query('ALTER TABLE froxlor.panel_domains ADD special_phpsettings TEXT DEFAULT ""');
 
+    // Add php versions
+    $db->query('ALTER TABLE froxlor.panel_domains ADD php_version VARCHAR(100) DEFAULT "5.3.22"');
+    $db->query('ALTER TABLE froxlor.panel_customers ADD nitrado_service_type VARCHAR(50) DEFAULT "beginner"');
+
 	updateToVersion('0.9.27');
 }
 
