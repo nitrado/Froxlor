@@ -27,10 +27,6 @@ return array (
 					'label' => $lng['menue']['main']['username'],
 				),
 				array (
-					'url' => 'customer_index.php?page=change_password',
-					'label' => $lng['menue']['main']['changepassword'],
-				),
-				array (
 					'url' => 'customer_index.php?page=change_language',
 					'label' => $lng['menue']['main']['changelanguage'],
 				),
@@ -154,10 +150,6 @@ return array (
 			'elements' => array (
 				array (
 					'label' => $lng['menue']['main']['username'],
-				),
-				array (
-					'url' => 'admin_index.php?page=change_password',
-					'label' => $lng['menue']['main']['changepassword'],
 				),
 				array (
 					'url' => 'admin_index.php?page=change_language',
