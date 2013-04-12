@@ -26,6 +26,12 @@ return array(
                         'select_var' => array('on', 'off'),
                         'default' => 'off'
 					),
+					'php_allow_url_include' => array(
+						'label' => 'allow_url_include',
+						'type' => 'select',
+                        'select_var' => array('on', 'off'),
+                        'default' => 'off'
+					),
 					'php_suhosin_session_encrypt' => array(
 						'label' => 'suhosin.session.encrypt',
 						'type' => 'select',
