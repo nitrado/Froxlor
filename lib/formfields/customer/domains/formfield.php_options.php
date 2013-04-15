@@ -32,11 +32,11 @@ return array(
                         'select_var' => array('on', 'off'),
                         'default' => 'off'
 					),
-					'php_suhosin_session_encrypt' => array(
-						'label' => 'suhosin.session.encrypt',
+					'php_max_input_time' => array(
+						'label' => 'max_input_time',
 						'type' => 'select',
-                        'select_var' => array('on', 'off'),
-                        'default' => 'on'
+                        'select_var' => array('30', '60', '120', '180'),
+                        'default' => '60'
                     ),
 
                     // PHP Extensions (see customer_domains)
