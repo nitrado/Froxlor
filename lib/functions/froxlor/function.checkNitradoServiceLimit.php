@@ -13,10 +13,10 @@ function checkNitradoServiceLimit($customerID, $action, $item, $value=null) {
             'general' => array(),
             'php' => array(
                 'php_version' => array('5.4.12', '5.5.0alpha6'),
-                'zend_extension' => array(
-                    '/opt/php-builds/extensions/ioncube_loader_lin_5.4.so',
-                    '/opt/php-builds/extensions/ioncube_loader_lin_5.3.so'
-                ),
+                //'zend_extension' => array(
+                //    '/opt/php-builds/extensions/ioncube_loader_lin_5.4.so',
+                //    '/opt/php-builds/extensions/ioncube_loader_lin_5.3.so'
+                //),
                 'memory_limit' => array('256M')
             ),
             //'mysql' => array(
