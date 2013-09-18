@@ -32,9 +32,9 @@ $zend_extensions = array(
 
 // PHP versions
 $availablePHPVersions = array(
-    '5.3.22',
-    '5.4.12',
-    '5.5.0alpha6'
+    '5.3',
+    '5.4',
+    '5.5'
 );
 function currentPHPVersion($customerID, $domainID) {
     global $db;
@@ -362,7 +362,7 @@ elseif($page == 'domains')
                     $php_version = $_POST['php_version'];
                     if (!in_array($_POST['php_version'], $availablePHPVersions) ||
                         !checkNitradoServiceLimit((int)$userinfo['customerid'], 'php', 'php_version', $php_version))
-                        $php_version = "5.3.22";
+                        $php_version = "5.3";
 
 					$result = $db->query("INSERT INTO `" . TABLE_PANEL_DOMAINS . "` SET 
 								`customerid` = '" . (int)$userinfo['customerid'] . "',
@@ -593,7 +593,7 @@ elseif($page == 'domains')
                 $php_version = $_POST['php_version'];
                 if (!in_array($_POST['php_version'], $availablePHPVersions) ||
                     !checkNitradoServiceLimit((int)$userinfo['customerid'], 'php', 'php_version', $php_version))
-                    $php_version = "5.3.22";
+                    $php_version = "5.3";
 
                 $db->query("UPDATE `" . TABLE_PANEL_DOMAINS . "`
                     SET php_version = '" . $php_version . "'

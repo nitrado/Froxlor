@@ -294,7 +294,12 @@ class phpinterface_fcgid
     private function _phpBinary($domainID) {
         $res = $this->_db->query_first("SELECT php_version FROM `" . TABLE_PANEL_DOMAINS . "`
             WHERE id = '$domainID'");
-        $phpVersion = $res ? $res['php_version'] : "5.3.22";
+        $phpVersion = $res ? $res['php_version'] : "5.3";
+
+        // Legacy check. Old php versions are in the form like 5.5.0alpha3 but we
+        // need just the major version.
+        if (strlen($phpVersion) > 3) $phpVersion = substr($phpVersion, 0, 3);
+
         if (file_exists("/opt/php-builds/php-cgi-$phpVersion"))
             return "/opt/php-builds/php-cgi-$phpVersion";
         return "/usr/bin/php-cgi";
