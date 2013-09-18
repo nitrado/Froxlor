@@ -39,5 +39,11 @@ function makeSecurePath($path)
 	);
 	$path = preg_replace($search, $replace, $path);
 	$path = str_replace(" ", "\ ", $path);
+
+    // Check the path for some special chars the cronjob rejects to
+    // work. If we found such a "bad" char, we strip it away.
+    foreach (array(';', '|', '&', '>', '<', '`', '$', '~', '?') as $badChar)
+        $path = str_replace($badChar, '', $path);
+
 	return $path;
 }
