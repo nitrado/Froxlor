@@ -87,6 +87,7 @@ $lng['menue']['mysql']['databases'] = 'Databases';
 $lng['menue']['mysql']['phpmyadmin'] = 'phpMyAdmin';
 $lng['menue']['domains']['domains'] = 'Domains';
 $lng['menue']['domains']['settings'] = 'Settings';
+$lng['menue']['domains']['log'] = 'Logfiles';
 $lng['menue']['ftp']['ftp'] = 'FTP';
 $lng['menue']['ftp']['accounts'] = 'Accounts';
 $lng['menue']['ftp']['webftp'] = 'WebFTP';

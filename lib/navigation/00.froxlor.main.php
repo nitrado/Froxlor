@@ -95,6 +95,10 @@ return array (
 					'url' => 'customer_domains.php?page=domains',
 					'label' => $lng['menue']['domains']['settings'],
 				),
+				array (
+					'url' => 'customer_domains.php?page=log',
+					'label' => $lng['menue']['domains']['log'],
+				),
 			),
 		),
 		'ftp' => array (

@@ -72,6 +72,26 @@ if($page == 'overview')
 	$log->logAction(USR_ACTION, LOG_NOTICE, "viewed customer_domains");
 	eval("echo \"" . getTemplate("domains/domains") . "\";");
 }
+elseif ($page === 'log') {
+	$log->logAction(USR_ACTION, LOG_NOTICE, "viewed customer_domains::log");
+    require_once('lib/classes/domains/class.logviewer.php');
+
+    if ($action === 'newlines') {
+        $type = 'access';
+        $lastSize = 0;
+        if (isset($_GET['type']) && in_array($_GET['type'], array('access', 'error'))) $type = $_GET['type'];
+        if (isset($_GET['last_size'])) $lastSize = (int)$_GET['last_size'];
+
+        $customerid_result = $db->query("SELECT loginname FROM `" . TABLE_PANEL_CUSTOMERS . "` WHERE customerid = " . (int)$userinfo['customerid']);
+        $customerid_row = $db->fetch_array($customerid_result);
+
+        $logview = new LogViewer($customerid_row['loginname']);
+        echo json_encode($logview->newLines($type, $lastSize));
+    } else {
+        // Render template
+        eval("echo \"" . getTemplate("domains/domains_log") . "\";");
+    }
+}
 elseif($page == 'domains')
 {
 	if($action == '')

@@ -782,3 +782,50 @@ table thead th {
 a, a:active, a:visited {
     color: #000;
 }
+
+/* Server log styles */
+
+#logfile-menu {
+  list-style-type: none;
+  margin: 10px 0 3px 5px;
+  padding: 0;
+  height: 30px;
+}
+#logfile-menu li {
+  float: left;
+  width: 170px;
+  padding: 5px;
+}
+#logfile-menu li.active {
+  background-color: #eee;
+}
+#logfile-menu li img {
+  width: 20px;
+  margin-right: 5px;
+}
+
+.log-output {
+  height: 500px;
+  overflow: scroll;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+  margin-bottom: 30px;
+}
+
+.log-output p {
+  padding: 2px 5px;
+  margin: 0;
+  background-color: #aaa;
+  white-space: nowrap;
+  font-size: 11px;
+  font-family: Courier;
+}
+.log-output p:nth-child(even) {
+  background-color: #e4e4e4;
+}
+.log-output p:nth-child(odd) {
+  background-color: #ddd;
+}
+.log-output p:hover {
+  background-color: #eee;
+}
