@@ -12,7 +12,7 @@ function checkNitradoServiceLimit($customerID, $action, $item, $value=null) {
         'beginner' => array(
             'general' => array(),
             'php' => array(
-                'php_version' => array('5.4.12', '5.5.0alpha6'),
+                'php_version' => array('5.4', '5.5'),
                 //'zend_extension' => array(
                 //    '/opt/php-builds/extensions/ioncube_loader_lin_5.4.so',
                 //    '/opt/php-builds/extensions/ioncube_loader_lin_5.3.so'
