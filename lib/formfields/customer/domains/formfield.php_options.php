@@ -45,6 +45,13 @@ return array(
                         'type' => 'select',
                         'select_var' => array('disabled', 'enabled'),
                         'default' => 'disabled'
+                    ),
+
+                    'zend_extension_zend_guard_loader' => array(
+                        'label' => 'Zend Guard Loader (+Zend Optimizer)',
+                        'type' => 'select',
+                        'select_var' => array('disabled', 'enabled'),
+                        'default' => 'disabled'
                     )
 				)
 			)

@@ -27,6 +27,7 @@ require ("./lib/init.php");
 
 // TODO: Put this into a configuration file or something else.
 $zend_extensions = array(
+    'zend_extension_zend_guard_loader' => '/opt/php-builds/extensions/ZendGuardLoader_%VERSION%.so',
     'zend_extension_ioncube_loader' => '/opt/php-builds/extensions/ioncube_loader_lin_%VERSION%.so'
 );
 
