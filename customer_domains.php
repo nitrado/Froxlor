@@ -34,14 +34,15 @@ $zend_extensions = array(
 $availablePHPVersions = array(
     '5.3',
     '5.4',
-    '5.5'
+    '5.5',
+    '5.6'
 );
 function currentPHPVersion($customerID, $domainID) {
     global $db;
     $res = $db->query_first("SELECT php_version FROM `" . TABLE_PANEL_DOMAINS . "`
         WHERE `customerid`='" . (int)$customerID . "'
         AND `id`='" . (int)$domainID . "'");
-    return $res ? $res['php_version'] : "5.3.22";
+    return $res ? $res['php_version'] : "5.3";
 }
 
 
