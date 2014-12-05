@@ -83,7 +83,7 @@ class DB {
             return mysqli_real_escape_string($this->db, $n);
         }
         
-        public function __desctruct() {
+        public function __destruct() {
             mysqli_close($this->db);
         }
 }
