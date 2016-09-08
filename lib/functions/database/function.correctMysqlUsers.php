@@ -19,73 +19,75 @@
 
 function correctMysqlUsers($mysql_access_host_array)
 {
-	global $db, $settings, $sql, $sql_root;
-	
-	foreach($sql_root as $mysql_server => $mysql_server_details)
-	{
-		$db_root = new db($mysql_server_details['host'], $mysql_server_details['user'], $mysql_server_details['password'], '');
-		unset($db_root->password);
+    global $db, $settings, $sql, $sql_root;
 
-		$users = array();
-		$users_result = $db_root->query('SELECT * FROM `mysql`.`user`');
+    $_MAX_USER_CONNECTIONS = 30;
 
-		while($users_row = $db_root->fetch_array($users_result))
-		{
-			if(!isset($users[$users_row['User']])
-			   || !is_array($users[$users_row['User']]))
-			{
-				$users[$users_row['User']] = array(
-					'password' => $users_row['Password'],
-					'hosts' => array()
-				);
-			}
+    foreach($sql_root as $mysql_server => $mysql_server_details)
+    {
+        $db_root = new db($mysql_server_details['host'], $mysql_server_details['user'], $mysql_server_details['password'], '');
+        unset($db_root->password);
 
-			$users[$users_row['User']]['hosts'][] = $users_row['Host'];
-		}
+        $users = array();
+        $users_result = $db_root->query('SELECT * FROM `mysql`.`user`');
 
-		$databases = array(
-			$sql['db']
-		);
-		$databases_result = $db->query('SELECT * FROM `' . TABLE_PANEL_DATABASES . '` WHERE `dbserver` = \'' . $mysql_server . '\'');
+        while($users_row = $db_root->fetch_array($users_result))
+        {
+            if(!isset($users[$users_row['User']])
+                || !is_array($users[$users_row['User']]))
+            {
+                $users[$users_row['User']] = array(
+                    'password' => $users_row['Password'],
+                    'hosts' => array()
+                );
+            }
 
-		while($databases_row = $db->fetch_array($databases_result))
-		{
-			$databases[] = $databases_row['databasename'];
-		}
+            $users[$users_row['User']]['hosts'][] = $users_row['Host'];
+        }
 
-		foreach($databases as $username)
-		{
-			if(isset($users[$username])
-			   && is_array($users[$username])
-			   && isset($users[$username]['hosts'])
-			   && is_array($users[$username]['hosts']))
-			{
-				$password = $users[$username]['password'];
-				foreach($mysql_access_host_array as $mysql_access_host)
-				{
-					$mysql_access_host = trim($mysql_access_host);
+        $databases = array(
+            $sql['db']
+        );
+        $databases_result = $db->query('SELECT * FROM `' . TABLE_PANEL_DATABASES . '` WHERE `dbserver` = \'' . $mysql_server . '\'');
 
-					if(!in_array($mysql_access_host, $users[$username]['hosts']))
-					{
-						$db_root->query('GRANT ALL PRIVILEGES ON `' . str_replace('_', '\_', $db_root->escape($username)) . '`.* TO `' . $db_root->escape($username) . '`@`' . $db_root->escape($mysql_access_host) . '` IDENTIFIED BY \'password\'');
-						$db_root->query('SET PASSWORD FOR `' . $db_root->escape($username) . '`@`' . $db_root->escape($mysql_access_host) . '` = \'' . $db_root->escape($password) . '\'');
-					}
-				}
+        while($databases_row = $db->fetch_array($databases_result))
+        {
+            $databases[] = $databases_row['databasename'];
+        }
 
-				foreach($users[$username]['hosts'] as $mysql_access_host)
-				{
-					if(!in_array($mysql_access_host, $mysql_access_host_array))
-					{
-						$db_root->query('REVOKE ALL PRIVILEGES ON * . * FROM `' . $db_root->escape($username) . '`@`' . $db_root->escape($mysql_access_host) . '`');
-						$db_root->query('REVOKE ALL PRIVILEGES ON `' . str_replace('_', '\_', $db_root->escape($username)) . '` . * FROM `' . $db_root->escape($username) . '`@`' . $db_root->escape($mysql_access_host) . '`');
-						$db_root->query('DELETE FROM `mysql`.`user` WHERE `User` = "' . $db_root->escape($username) . '" AND `Host` = "' . $db_root->escape($mysql_access_host) . '"');
-					}
-				}
-			}
-		}
+        foreach($databases as $username)
+        {
+            if(isset($users[$username])
+                && is_array($users[$username])
+                && isset($users[$username]['hosts'])
+                && is_array($users[$username]['hosts']))
+            {
+                $password = $users[$username]['password'];
+                foreach($mysql_access_host_array as $mysql_access_host)
+                {
+                    $mysql_access_host = trim($mysql_access_host);
 
-		$db_root->query('FLUSH PRIVILEGES');
-		$db_root->close();
-		unset($db_root);
-	}
+                    if(!in_array($mysql_access_host, $users[$username]['hosts']))
+                    {
+                        $db_root->query('GRANT ALL PRIVILEGES ON `' . str_replace('_', '\_', $db_root->escape($username)) . '`.* TO `' . $db_root->escape($username) . '`@`' . $db_root->escape($mysql_access_host) . '` IDENTIFIED BY \'password\' WITH MAX_USER_CONNECTIONS ' . $_MAX_USER_CONNECTIONS);
+                        $db_root->query('SET PASSWORD FOR `' . $db_root->escape($username) . '`@`' . $db_root->escape($mysql_access_host) . '` = \'' . $db_root->escape($password) . '\'');
+                    }
+                }
+
+                foreach($users[$username]['hosts'] as $mysql_access_host)
+                {
+                    if(!in_array($mysql_access_host, $mysql_access_host_array))
+                    {
+                        $db_root->query('REVOKE ALL PRIVILEGES ON * . * FROM `' . $db_root->escape($username) . '`@`' . $db_root->escape($mysql_access_host) . '`');
+                        $db_root->query('REVOKE ALL PRIVILEGES ON `' . str_replace('_', '\_', $db_root->escape($username)) . '` . * FROM `' . $db_root->escape($username) . '`@`' . $db_root->escape($mysql_access_host) . '`');
+                        $db_root->query('DELETE FROM `mysql`.`user` WHERE `User` = "' . $db_root->escape($username) . '" AND `Host` = "' . $db_root->escape($mysql_access_host) . '"');
+                    }
+                }
+            }
+        }
+
+        $db_root->query('FLUSH PRIVILEGES');
+        $db_root->close();
+        unset($db_root);
+    }
 }

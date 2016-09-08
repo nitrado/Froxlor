@@ -18,6 +18,7 @@
  */
 
 define('AREA', 'customer');
+$_MAX_USER_CONNECTIONS = 30;
 
 /**
  * Include our init.php, which manages Sessions, Language etc.
@@ -84,12 +85,12 @@ elseif($page == 'mysqls')
 		eval("echo \"" . getTemplate("mysql/mysqls") . "\";");
 	}
 	elseif($action == 'delete'
-	       && $id != 0)
+		&& $id != 0)
 	{
 		$result = $db->query_first('SELECT `id`, `databasename`, `description`, `dbserver`, `allow_external_access` FROM `' . TABLE_PANEL_DATABASES . '` WHERE `customerid`="' . (int)$userinfo['customerid'] . '" AND `id`="' . (int)$id . '"');
 
 		if(isset($result['databasename'])
-		   && $result['databasename'] != '')
+			&& $result['databasename'] != '')
 		{
 			if(!isset($sql_root[$result['dbserver']]) || !is_array($sql_root[$result['dbserver']]))
 			{
@@ -97,7 +98,7 @@ elseif($page == 'mysqls')
 			}
 
 			if(isset($_POST['send'])
-			   && $_POST['send'] == 'send')
+				&& $_POST['send'] == 'send')
 			{
 				// Begin root-session
 				$db_root = new db($sql_root[$result['dbserver']]['host'], $sql_root[$result['dbserver']]['user'], $sql_root[$result['dbserver']]['password'], '');
@@ -109,16 +110,16 @@ elseif($page == 'mysqls')
 					$db_root->query('DELETE FROM `mysql`.`user` WHERE `User` = "' . $db_root->escape($result['databasename']) . '" AND `Host` = "' . $db_root->escape($mysql_access_host) . '"', false, true);
 				}
 
-                // Remove external access
-                if ($result['allow_external_access'] == '1') {
+				// Remove external access
+				if ($result['allow_external_access'] == '1') {
 					$db_root->query('REVOKE ALL PRIVILEGES ON * . * FROM `' . $db_root->escape($result['databasename']) . '`@`%`', false, true);
 					$db_root->query('REVOKE ALL PRIVILEGES ON `' . str_replace('_', '\_', $db_root->escape($result['databasename'])) . '` . * FROM `' . $db_root->escape($result['databasename']) . '`@`%`', false, true);
 					$db_root->query('DELETE FROM `mysql`.`user` WHERE `User` = "' . $db_root->escape($result['databasename']) . '" AND `Host` = "%"', false, true);
-                }
+				}
 
 				$db_root->query('DROP DATABASE IF EXISTS `' . $db_root->escape($result['databasename']) . '`');
 				$db_root->query('FLUSH PRIVILEGES');
-                $db_root->close();
+				$db_root->close();
 
 				// End root-session
 
@@ -149,10 +150,10 @@ elseif($page == 'mysqls')
 	elseif($action == 'add')
 	{
 		if($userinfo['mysqls_used'] < $userinfo['mysqls']
-		   || $userinfo['mysqls'] == '-1')
+			|| $userinfo['mysqls'] == '-1')
 		{
 			if(isset($_POST['send'])
-			   && $_POST['send'] == 'send')
+				&& $_POST['send'] == 'send')
 			{
 				$password = validate($_POST['mysql_password'], 'password');
 				$password = validatePassword($password);
@@ -192,14 +193,14 @@ elseif($page == 'mysqls')
 					$log->logAction(USR_ACTION, LOG_INFO, "created database '" . $username . "'");
 					foreach(array_map('trim', explode(',', $settings['system']['mysql_access_host'])) as $mysql_access_host)
 					{
-						$db_root->query('GRANT ALL PRIVILEGES ON `' . str_replace('_', '\_', $db_root->escape($username)) . '`.* TO `' . $db_root->escape($username) . '`@`' . $db_root->escape($mysql_access_host) . '` IDENTIFIED BY \'password\'');
+						$db_root->query('GRANT ALL PRIVILEGES ON `' . str_replace('_', '\_', $db_root->escape($username)) . '`.* TO `' . $db_root->escape($username) . '`@`' . $db_root->escape($mysql_access_host) . '` IDENTIFIED BY \'password\' WITH MAX_USER_CONNECTIONS ' . $_MAX_USER_CONNECTIONS);
 						$db_root->query('SET PASSWORD FOR `' . $db_root->escape($username) . '`@`' . $db_root->escape($mysql_access_host) . '` = PASSWORD(\'' . $db_root->escape($password) . '\')');
-						$log->logAction(USR_ACTION, LOG_NOTICE, "grant all privileges for '" . $username . "'@'" . $mysql_access_host . "'");
+						$log->logAction(USR_ACTION, LOG_NOTICE, "grant all privileges for '" . $username . "'@'" . $mysql_access_host . "' WITH MAX_USER_CONNECTIONS " . $_MAX_USER_CONNECTIONS);
 					}
-                    if (isset($_POST['mysql_allow_external_access'])) {
-						$db_root->query('GRANT ALL PRIVILEGES ON `' . str_replace('_', '\_', $db_root->escape($username)) . '`.* TO `' . $db_root->escape($username) . '`@`%` IDENTIFIED BY \'password\'');
+					if (isset($_POST['mysql_allow_external_access'])) {
+						$db_root->query('GRANT ALL PRIVILEGES ON `' . str_replace('_', '\_', $db_root->escape($username)) . '`.* TO `' . $db_root->escape($username) . '`@`%` IDENTIFIED BY \'password\' WITH MAX_USER_CONNECTIONS ' . $_MAX_USER_CONNECTIONS);
 						$db_root->query('SET PASSWORD FOR `' . $db_root->escape($username) . '`@`%` = PASSWORD(\'' . $db_root->escape($password) . '\')');
-                    }
+					}
 
 					$db_root->query('FLUSH PRIVILEGES');
 					$db_root->close();
@@ -208,7 +209,7 @@ elseif($page == 'mysqls')
 					// Statement modifyed for Database description -- PH 2004-11-29
 
 					$databasedescription = validate($_POST['description'], 'description');
-                    $external_access_val = isset($_POST['mysql_allow_external_access']) ? '1' : '0';
+					$external_access_val = isset($_POST['mysql_allow_external_access']) ? '1' : '0';
 					$result = $db->query('INSERT INTO `' . TABLE_PANEL_DATABASES . '` (`customerid`, `databasename`, `description`, `dbserver`, `allow_external_access`) VALUES ("' . (int)$userinfo['customerid'] . '", "' . $db->escape($username) . '", "' . $db->escape($databasedescription) . '", "' . $db->escape($dbserver) . '", "' . $external_access_val . '")');
 					$result = $db->query('UPDATE `' . TABLE_PANEL_CUSTOMERS . '` SET `mysqls_used`=`mysqls_used`+1, `mysql_lastaccountnumber`=`mysql_lastaccountnumber`+1 WHERE `customerid`="' . (int)$userinfo['customerid'] . '"');
 
@@ -228,7 +229,7 @@ elseif($page == 'mysqls')
 							'DB_SRV' => $_SERVER["SERVER_NAME"],
 							'PMA_URI' => $pma
 						);
-						
+
 						$def_language = $userinfo['def_language'];
 						$result = $db->query_first('SELECT `value` FROM `' . TABLE_PANEL_TEMPLATES . '` WHERE `adminid`=\'' . (int)$userinfo['adminid'] . '\' AND `language`=\'' . $db->escape($def_language) . '\' AND `templategroup`=\'mails\' AND `varname`=\'new_database_by_customer_subject\'');
 						$mail_subject = html_entity_decode(replace_variables((($result['value'] != '') ? $result['value'] : $lng['customer']['mysql_add']['infomail_subject']), $replace_arr));
@@ -273,9 +274,9 @@ elseif($page == 'mysqls')
 				#$sendinfomail = makeyesno('sendinfomail', '1', '0', '0');
 
 				$mysql_add_data = include_once dirname(__FILE__).'/lib/formfields/customer/mysql/formfield.mysql_add.php';
-                if (!checkNitradoServiceLimit((int)$userinfo['customerid'], 'mysql', 'allow_external_access', '1')) {
-                    unset($mysql_add_data['mysql_add']['sections']['section_a']['fields']['mysql_allow_external_access']);
-                }
+				if (!checkNitradoServiceLimit((int)$userinfo['customerid'], 'mysql', 'allow_external_access', '1')) {
+					unset($mysql_add_data['mysql_add']['sections']['section_a']['fields']['mysql_allow_external_access']);
+				}
 				$mysql_add_form = htmlform::genHTMLForm($mysql_add_data);
 
 				$title = $mysql_add_data['mysql_add']['title'];
@@ -286,14 +287,14 @@ elseif($page == 'mysqls')
 		}
 	}
 	elseif($action == 'edit'
-	       && $id != 0)
+		&& $id != 0)
 	{
 		$result = $db->query_first('SELECT `id`, `databasename`, `description`, `dbserver`, `allow_external_access` FROM `' . TABLE_PANEL_DATABASES . '` WHERE `customerid`="' . $userinfo['customerid'] . '" AND `id`="' . $id . '"');
-        $db_server = $result['dbserver'];
-        $user_db_name = $result['databasename'];
+		$db_server = $result['dbserver'];
+		$user_db_name = $result['databasename'];
 
 		if(isset($result['databasename'])
-		   && $result['databasename'] != '')
+			&& $result['databasename'] != '')
 		{
 			if(!isset($sql_root[$result['dbserver']]) || !is_array($sql_root[$result['dbserver']]))
 			{
@@ -301,29 +302,29 @@ elseif($page == 'mysqls')
 			}
 
 			if(isset($_POST['send'])
-			   && $_POST['send'] == 'send')
+				&& $_POST['send'] == 'send')
 			{
 				// Only change Password if it is set, do nothing if it is empty! -- PH 2004-11-29
-                $password = validate($_POST['mysql_password'], 'password');
-                $external_access_val = isset($_POST['mysql_allow_external_access']) ? '1' : '0';
+				$password = validate($_POST['mysql_password'], 'password');
+				$external_access_val = isset($_POST['mysql_allow_external_access']) ? '1' : '0';
 
-                if (!checkNitradoServiceLimit($userinfo['customerid'], 'mysql', 'allow_external_access'))
-                    $external_access_val = '0';
+				if (!checkNitradoServiceLimit($userinfo['customerid'], 'mysql', 'allow_external_access'))
+					$external_access_val = '0';
 
-                // External access checkbox
-                $db_root = new db($sql_root[$result['dbserver']]['host'], $sql_root[$result['dbserver']]['user'], $sql_root[$result['dbserver']]['password'], '');
+				// External access checkbox
+				$db_root = new db($sql_root[$result['dbserver']]['host'], $sql_root[$result['dbserver']]['user'], $sql_root[$result['dbserver']]['password'], '');
 
-                if ($external_access_val == '1') {
-                    $db_root->query('GRANT ALL PRIVILEGES ON `'. $db_root->escape($result['databasename'])  .'`.* TO \''. $db_root->escape($result['databasename']) .'\'@\'%\'', false, true);
-                    $db_root->query('GRANT USAGE ON *.* TO \''. $db_root->escape($result['databasename']) .'\'@\'%\' IDENTIFIED BY \'password\'', false, true);
-                    $current_password = $db_root->query_first('SELECT password FROM mysql.user WHERE user = \'' . $db_root->escape($result['databasename']) . '\' AND Host = \'localhost\'', false, true);
-                    $db_root->query('SET PASSWORD FOR `' . $db_root->escape($result['databasename']) . '`@`%` = \''. $current_password['password'] .'\'', false, true);
-                } else {
-                    $db_root->query('REVOKE ALL PRIVILEGES ON * . * FROM `' . $db_root->escape($result['databasename']) . '`@`%`', false, true);
-                    $db_root->query('REVOKE ALL PRIVILEGES ON `' . str_replace('_', '\_', $db_root->escape($result['databasename'])) . '` . * FROM `' . $db_root->escape($result['databasename']) . '`@`%`', false, true);
-                    $db_root->query('DELETE FROM `mysql`.`user` WHERE `User` = "' . $db_root->escape($result['databasename']) . '" AND `Host` = "%"', false, true);
-                }
-			    $db_root->query('FLUSH PRIVILEGES');
+				if ($external_access_val == '1') {
+					$db_root->query('GRANT ALL PRIVILEGES ON `'. $db_root->escape($result['databasename'])  .'`.* TO \''. $db_root->escape($result['databasename']) .'\'@\'%\'  WITH MAX_USER_CONNECTIONS ' . $_MAX_USER_CONNECTIONS, false, true);
+					$db_root->query('GRANT USAGE ON *.* TO \''. $db_root->escape($result['databasename']) .'\'@\'%\' IDENTIFIED BY \'password\' WITH MAX_USER_CONNECTIONS ' . $_MAX_USER_CONNECTIONS, false, true);
+					$current_password = $db_root->query_first('SELECT password FROM mysql.user WHERE user = \'' . $db_root->escape($result['databasename']) . '\' AND Host = \'localhost\'', false, true);
+					$db_root->query('SET PASSWORD FOR `' . $db_root->escape($result['databasename']) . '`@`%` = \''. $current_password['password'] .'\'', false, true);
+				} else {
+					$db_root->query('REVOKE ALL PRIVILEGES ON * . * FROM `' . $db_root->escape($result['databasename']) . '`@`%`', false, true);
+					$db_root->query('REVOKE ALL PRIVILEGES ON `' . str_replace('_', '\_', $db_root->escape($result['databasename'])) . '` . * FROM `' . $db_root->escape($result['databasename']) . '`@`%`', false, true);
+					$db_root->query('DELETE FROM `mysql`.`user` WHERE `User` = "' . $db_root->escape($result['databasename']) . '" AND `Host` = "%"', false, true);
+				}
+				$db_root->query('FLUSH PRIVILEGES');
 				$db_root->close();
 
 
@@ -331,7 +332,7 @@ elseif($page == 'mysqls')
 				{
 					// validate password
 					$password = validatePassword($password);
-                    $access_result = $db->query_first('SELECT `allow_external_access` FROM `' . TABLE_PANEL_DATABASES .'` WHERE `customerid`="' . (int)$userinfo['customerid'] . '" AND `id`="' . (int)$id . '"');
+					$access_result = $db->query_first('SELECT `allow_external_access` FROM `' . TABLE_PANEL_DATABASES .'` WHERE `customerid`="' . (int)$userinfo['customerid'] . '" AND `id`="' . (int)$id . '"');
 
 					// Begin root-session
 					$db_root = new db($sql_root[$result['dbserver']]['host'], $sql_root[$result['dbserver']]['user'], $sql_root[$result['dbserver']]['password'], '');
@@ -339,10 +340,10 @@ elseif($page == 'mysqls')
 					{
 						$db_root->query('SET PASSWORD FOR `' . $db_root->escape($result['databasename']) . '`@`' . $db_root->escape($mysql_access_host) . '` = PASSWORD(\'' . $db_root->escape($password) . '\')');
 					}
-                    //if ($access_result['allow_external_access'] == '1' && $_POST['mysql_allow_external_access'] == '1') {
-                    if ($external_access_val == '1') {
-                        $db_root->query('SET PASSWORD FOR `' . $db_root->escape($result['databasename']) . '`@`%` = PASSWORD(\'' . $db_root->escape($password) . '\')');
-                    }
+					//if ($access_result['allow_external_access'] == '1' && $_POST['mysql_allow_external_access'] == '1') {
+					if ($external_access_val == '1') {
+						$db_root->query('SET PASSWORD FOR `' . $db_root->escape($result['databasename']) . '`@`%` = PASSWORD(\'' . $db_root->escape($password) . '\')');
+					}
 
 					$db_root->query('FLUSH PRIVILEGES');
 					$db_root->close();
@@ -359,11 +360,11 @@ elseif($page == 'mysqls')
 			}
 			else
 			{
-                $access_result = $db->query_first('SELECT `allow_external_access` FROM `' . TABLE_PANEL_DATABASES .'` WHERE `customerid`="' . (int)$userinfo['customerid'] . '" AND `id`="' . (int)$id . '"');
+				$access_result = $db->query_first('SELECT `allow_external_access` FROM `' . TABLE_PANEL_DATABASES .'` WHERE `customerid`="' . (int)$userinfo['customerid'] . '" AND `id`="' . (int)$id . '"');
 				$mysql_edit_data = include_once dirname(__FILE__).'/lib/formfields/customer/mysql/formfield.mysql_edit.php';
-                if (!checkNitradoServiceLimit((int)$userinfo['customerid'], 'mysql', 'allow_external_access', '1')) {
-                    unset($mysql_edit_data['mysql_edit']['sections']['section_a']['fields']['mysql_allow_external_access']);
-                }
+				if (!checkNitradoServiceLimit((int)$userinfo['customerid'], 'mysql', 'allow_external_access', '1')) {
+					unset($mysql_edit_data['mysql_edit']['sections']['section_a']['fields']['mysql_allow_external_access']);
+				}
 				$mysql_edit_form = htmlform::genHTMLForm($mysql_edit_data);
 
 				$title = $mysql_edit_data['mysql_edit']['title'];
